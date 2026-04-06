@@ -48,3 +48,10 @@ services:
     depends_on:
       - postgres
       - kafka
+  trading-ui: # ← new
+    build: ./trading-ui
+    ports:
+      - "3000:80"                      # React runs on nginx port 80 inside container
+    depends_on:
+      - user-service
+      - order-service
