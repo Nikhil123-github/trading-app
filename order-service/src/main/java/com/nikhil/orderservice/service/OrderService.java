@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,7 +33,8 @@ public class OrderService {
     @Autowired
     private KafkaTemplate<String,OrderEvent> kafkaTemplate;
 
-    public void placeOrder(Long userId, OrderRequestDto orderRequest) throws Exception {
+    @Transactional
+    public Order placeOrder(Long userId, OrderRequestDto orderRequest) throws Exception {
         var user = userCacheRepository.findById(userId)
                 .orElseThrow(() -> new Exception("User "+ userId + "not found"));
 
@@ -67,6 +69,8 @@ public class OrderService {
 
         kafkaTemplate.send("order-event", orderEvent);
         log.info("Order {} placed and published to Kafka", order.getId());
+
+        return order;
     }
 
     public List<OrderHistoryDto> getOrderHistory(Long userId) {

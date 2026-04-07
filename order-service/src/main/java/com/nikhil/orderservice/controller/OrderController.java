@@ -2,7 +2,9 @@ package com.nikhil.orderservice.controller;
 
 import com.nikhil.orderservice.dto.OrderHistoryDto;
 import com.nikhil.orderservice.dto.OrderRequestDto;
+import com.nikhil.orderservice.dto.OrderResponseDto;
 import com.nikhil.orderservice.dto.PriceDto;
+import com.nikhil.orderservice.entity.Order;
 import com.nikhil.orderservice.finnhub.FinnhubClient;
 import com.nikhil.orderservice.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +34,16 @@ public class OrderController {
     }
 
     @PostMapping("/{userId}")
-    public void placeOrder(@RequestBody OrderRequestDto orderRequest, @PathVariable Long userId) throws Exception {
-        orderService.placeOrder(userId,orderRequest);
+    public ResponseEntity<OrderResponseDto> placeOrder(@RequestBody OrderRequestDto orderRequest, @PathVariable Long userId) throws Exception {
+        Order order = orderService.placeOrder(userId,orderRequest);
+
+        return ResponseEntity.accepted().body(OrderResponseDto.builder().orderId(order.getId())
+                        .symbol(order.getSymbol())
+                        .type(order.getType())
+                        .quantity(order.getQuantity())
+                        .priceAtOrder(order.getPriceAtOrder())
+                        .status(order.getStatus())
+                .build());
     }
 
     @GetMapping("/{userId}/history")
